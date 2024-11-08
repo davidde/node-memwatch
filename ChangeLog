@@ -1,3 +1,9 @@
+v3.0.0
+	* BREAKING: Drop support for Node <= 17.
+	* Add support for Node >= 20.
+	* Convert `mocha` tests to `vitest`
+	* Convert CI from Travis.CI to GitHub workflows
+
 v2.0.0
 	* BREAKING: Drop support for Node <= 9.
 	* Add support for Node >= 10.
