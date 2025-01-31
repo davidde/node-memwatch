@@ -1,3 +1,6 @@
+Unreleased
+	* Fix windows compatibility of memwatch.cc
+
 v3.0.0
 	* BREAKING: Drop support for Node <= 17.
 	* Add support for Node >= 20.
