@@ -1,8 +1,11 @@
-`node-memwatch`: Leak Detection and Heap Diffing for Node.JS
-============================================================
+> [!NOTE]
+> **This fork fixes Windows compatibility of [node-memwatch](https://github.com/airbnb/node-memwatch).**
 
-`node-memwatch` is here to help you detect and find memory leaks in
-Node.JS code.  It provides:
+
+# Leak Detection and Heap Diffing for Node.js
+`node-memwatch` is here to help you detect and find memory leaks in `Node.js` code.  
+
+It provides:
 
 - A `stats` event, emitted on full MarkSweepCompact GCs giving you
   data describing your heap usage and trends over time.
@@ -11,16 +14,12 @@ Node.JS code.  It provides:
   two points in time, telling you what has been allocated, and what
   has been released.
 
+## Installation
+```
+npm install https://github.com/davidde/node-memwatch
+```
 
-Installation
-------------
-
-- `npm install @airbnb/node-memwatch`
-
-
-Description
------------
-
+## Description
 There are a growing number of tools for debugging and profiling memory
 usage in Node.JS applications, but there is still a need for a
 platform-independent native module that requires no special
@@ -29,30 +28,22 @@ instrumentation.  This module attempts to satisfy that need.
 To get started, import `node-memwatch` like so:
 
 ```javascript
-var memwatch = require('@airbnb/node-memwatch');
+var memwatch = require('node-memwatch');
 ```
 
 ### Leak Detection
-
 Currently unsupported while we explore heuristics
 
 ### Heap Usage
+The best way to evaluate your memory footprint is to look at heap usage right after V8 performs garbage collection.  
+`memwatch` does exactly this - it checks heap usage only after GC to give you a stable baseline of your actual memory usage.
 
-The best way to evaluate your memory footprint is to look at heap
-usage right after V8 performs garbage collection.  `memwatch` does
-exactly this - it checks heap usage only after GC to give you a stable
-baseline of your actual memory usage.
-
-When V8 performs a garbage collection (technically, we're talking
-about a full GC with heap compaction), `memwatch` will emit a `stats`
-event.
-
+When V8 performs a garbage collection (technically, we're talking about a full GC with heap compaction), `memwatch` will emit a `stats` event.
 ```javascript
 memwatch.on('stats', function(stats) { ... });
 ```
 
 The `stats` data will look something like this:
-
 ```javascript
 {
   gcScavengeCount: 1,
@@ -74,18 +65,12 @@ The `stats` data will look something like this:
   gc_time: 4587251 // ns
 }
 ```
-
-V8 has its own idea of when it's best to perform a GC, and under a
-heavy load, it may defer this action for some time.  To aid in
-speedier debugging, `memwatch` provides a `gc()` method to force V8 to
-do a full GC and heap compaction.
-
+V8 has its own idea of when it's best to perform a GC, and under a heavy load, it may defer this action for some time.  To aid in speedier debugging, `memwatch` provides a `gc()` method to force V8 to do a full GC and heap compaction.
 
 ### Heap Diffing
+For leak isolation, it provides a `HeapDiff` class that takes two snapshots and computes a diff between them.
 
-For leak isolation, it provides a `HeapDiff` class that takes two snapshots and
-computes a diff between them.  For example:
-
+For example:
 ```javascript
 // Take first snapshot
 var hd = new memwatch.HeapDiff();
@@ -97,7 +82,6 @@ var diff = hd.end();
 ```
 
 The contents of `diff` will look something like:
-
 ```javascript
 {
   "before": { "nodes": 11625, "size_bytes": 1869904, "size": "1.78 mb" },
@@ -118,23 +102,14 @@ The contents of `diff` will look something like:
   }
 }
 ```
+The diff shows that during the sample period, the total number of allocated `String` and `Array` classes decreased, but `Leaking Class` grew by 9998 allocations.  
+Hmmm.
 
-The diff shows that during the sample period, the total number of
-allocated `String` and `Array` classes decreased, but `Leaking Class`
-grew by 9998 allocations.  Hmmm.
+You can use `HeapDiff` in your `on('stats')` callback; even though it takes a memory snapshot, which triggers a V8 GC, it will not trigger the `stats` event itself.  
+Because that would be silly.
 
-You can use `HeapDiff` in your `on('stats')` callback; even though it
-takes a memory snapshot, which triggers a V8 GC, it will not trigger
-the `stats` event itself.  Because that would be silly.
+## Future Work
+Please see the [Issues](https://github.com/davidde/node-memwatch/issues) to share suggestions and contribute!
 
-
-Future Work
------------
-
-Please see the Issues to share suggestions and contribute!
-
-
-License
--------
-
+## License
 http://wtfpl.net
